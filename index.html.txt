@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xem Tử Vi Cá Nhân - 60 Can Chi</title>
+<style>
+body {font-family: Arial, sans-serif; margin:20px; background:#f5f5f5; text-align:center;}
+header img {width:100px; height:100px; border-radius:50%;}
+header h1 {font-size:24px; font-weight:bold; margin:10px 0 30px;}
+input[type=date], input[type=number] {padding:8px; font-size:16px; margin:5px 0; width:200px; text-align:center;}
+button {padding:10px 20px; font-size:16px; border:none; border-radius:5px; cursor:pointer; margin:5px;}
+#btnXemTuVi {background-color:#4CAF50; color:white; margin-top:20px;}
+#shareFacebook {background-color:#3b5998; color:white;}
+#shareZalo {background-color:#0082FC; color:white;}
+#downloadPDF {background-color:#f44336; color:white;}
+footer {margin-top:40px;}
+#ketQua {margin-top:30px; text-align:left; max-width:600px; margin-left:auto; margin-right:auto; background:white; padding:20px; border-radius:10px;}
+#ketQua h2 {text-align:center; color:#4CAF50;}
+.luan-giai {margin-bottom:15px;}
+.luan-giai h3 {margin-bottom:5px; color:#333;}
+.luan-giai p {margin:0; color:#555;}
+</style>
+</head>
+<body>
+
+<header>
+<img src="logo-am-duong-bat-quai.png" alt="Logo Âm Dương Bát Quái">
+<h1>XEM TỬ VI CÁ NHÂN - 60 CAN CHI</h1>
+</header>
+
+<div>
+  <div>
+    <label>Ngày sinh (Dương lịch):</label><br>
+    <input type="date" id="ngaySinh">
+  </div>
+  <div>
+    <label>Giờ sinh:</label><br>
+    <input type="number" id="gioSinh" min="0" max="23" placeholder="0-23">
+  </div>
+  <div>
+    <button id="btnXemTuVi">Xem tử vi</button>
+  </div>
+</div>
+
+<div id="ketQua"></div>
+
+<footer>
+<button id="shareFacebook">Chia sẻ Facebook</button>
+<button id="shareZalo">Chia sẻ Zalo</button>
+<button id="downloadPDF">Tải kết quả PDF</button>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+// ================== Dữ liệu Can Chi và 60 nạp âm ==================
+const can = ["Giáp","Ất","Bính","Đinh","Mậu","Kỷ","Canh","Tân","Nhâm","Quý"];
+const chi = ["Tý","Sửu","Dần","Mão","Thìn","Tỵ","Ngọ","Mùi","Thân","Dậu","Tuất","Hợi"];
+const nguHanh60 = [
+"Giáp Tý: Hải Trung Kim","Ất Sửu: Lư Trung Hỏa","Bính Dần: Sơn Đầu Hỏa","Đinh Mão: Lư Trung Hỏa",
+"Mậu Thìn: Thổ Địa Bích","Kỷ Tỵ: Thổ Địa Bích","Canh Ngọ: Sa Trung Kim","Tân Mùi: Sa Trung Kim",
+"Nhâm Thân: Kiếm Phong Kim","Quý Dậu: Kiếm Phong Kim","Giáp Tuất: Sơn Đầu Hỏa","Ất Hợi: Hải Trung Kim",
+"Bính Tý: Hải Trung Kim","Đinh Sửu: Lư Trung Hỏa","Mậu Dần: Sơn Đầu Hỏa","Kỷ Mão: Lư Trung Hỏa",
+"Canh Thìn: Thổ Địa Bích","Tân Tỵ: Thổ Địa Bích","Nhâm Ngọ: Sa Trung Kim","Quý Mùi: Sa Trung Kim",
+"Giáp Thân: Kiếm Phong Kim","Ất Dậu: Kiếm Phong Kim","Bính Tuất: Sơn Đầu Hỏa","Đinh Hợi: Hải Trung Kim",
+"Mậu Tý: Hải Trung Kim","Kỷ Sửu: Lư Trung Hỏa","Canh Dần: Sơn Đầu Hỏa","Tân Mão: Lư Trung Hỏa",
+"Nhâm Thìn: Thổ Địa Bích","Quý Tỵ: Thổ Địa Bích","Giáp Ngọ: Sa Trung Kim","Ất Mùi: Sa Trung Kim",
+"Bính Thân: Kiếm Phong Kim","Đinh Dậu: Kiếm Phong Kim","Mậu Tuất: Sơn Đầu Hỏa","Kỷ Hợi: Hải Trung Kim",
+"Canh Tý: Hải Trung Kim","Tân Sửu: Lư Trung Hỏa","Nhâm Dần: Sơn Đầu Hỏa","Quý Mão: Lư Trung Hỏa",
+"Giáp Thìn: Thổ Địa Bích","Ất Tỵ: Thổ Địa Bích","Bính Ngọ: Sa Trung Kim","Đinh Mùi: Sa Trung Kim",
+"Mậu Thân: Kiếm Phong Kim","Kỷ Dậu: Kiếm Phong Kim","Canh Tuất: Sơn Đầu Hỏa","Tân Hợi: Hải Trung Kim",
+"Nhâm Tý: Hải Trung Kim","Quý Sửu: Lư Trung Hỏa","Giáp Dần: Sơn Đầu Hỏa","Ất Mão: Lư Trung Hỏa",
+"Bính Thìn: Thổ Địa Bích","Đinh Tỵ: Thổ Địa Bích","Mậu Ngọ: Sa Trung Kim","Kỷ Mùi: Sa Trung Kim"
+];
+
+// ================== Hàm tính Can Chi năm, tháng, giờ ==================
+function tinhCanChiNam(year){ return can[(year+6)%10]+" "+chi[(year+8)%12]; }
+function tinhMenh(canChiNam){ const found=nguHanh60.find(i=>i.startsWith(canChiNam)); return found?found.split(": ")[1]:"Chưa xác định"; }
+function duongAm(d,m,y){ return new Intl.DateTimeFormat('vi-VN-u-ca-chinese',{day:'numeric',month:'numeric',year:'numeric'}).format(new Date(y,m-1,d)); }
+function tinhCanChiThang(y,m){ const canNam=(y+6)%10; const chiThang=chi[(m+1)%12]; const canThang = can[(canNam*2 + m-1)%10]; return canThang+" "+chiThang; }
+function tinhCanChiGio(canNgay,gio){ const canIndex=(2*can.indexOf(canNgay)+Math.floor(gio/2))%10; const chiIndex=Math.floor(gio/2); return can[canIndex]+" "+chi[chiIndex]; }
+
+// ================== Luận giải ==================
+function luanGiai(menh,canChiNgay,canChiGio){ return [
+{title:"Tính cách", text:`Thông minh, quyết đoán, hợp mệnh ${menh}, Can Chi ngày ${canChiNgay}, giờ sinh ${canChiGio}.`},
+{title:"Tài vận", text:`Tài vận tốt nếu tận dụng cơ hội, hợp Can Chi ngày ${canChiNgay}.`},
+{title:"Công danh & Sự nghiệp", text:`Sự nghiệp ổn định, hợp mệnh và giờ sinh ${canChiGio}.`},
+{title:"Gia đạo", text:"Gia đình hòa thuận, quan tâm người thân."},
+{title:"Tình Duyên", text:`Chuyện tình cảm thuận lợi, Can Chi giờ ${canChiGio} giúp gặp người phù hợp.`},
+{title:"Sức khỏe", text:"Chú ý tiêu hóa và thần kinh."},
+{title:"Màu hợp", text:"Xanh lá, trắng, vàng nhạt giúp tăng may mắn và bình an."},
+{title:"Tuổi hợp", text:"Tuổi Mão, Tuất, Thìn hợp làm ăn và hôn nhân."}];}
+
+// ================== Xem tử vi ==================
+document.getElementById('btnXemTuVi').addEventListener('click', ()=>{
+  const ngay=document.getElementById('ngaySinh').value, gio=document.getElementById('gioSinh').value;
+  if(!ngay||gio===""){ alert("Vui lòng nhập ngày và giờ sinh!"); return; }
+  const [y,m,d]=ngay.split("-").map(Number);
+  const canChiNam=tinhCanChiNam(y), menh=tinhMenh(canChiNam), ngayAm=duongAm(d,m,y);
+  const canChiThang=tinhCanChiThang(y,m), canChiGio=tinhCanChiGio(canChiNam,parseInt(gio));
+  const luan=luanGiai(menh,canChiThang,canChiGio);
+  let html=`<h2>Kết quả tử vi</h2>`;
+  html+=`<p>Ngày sinh Dương lịch: ${d}/${m}/${y}</p>`;
+  html+=`<p>Ngày sinh Âm lịch: ${ngayAm}</p>`;
+  html+=`<p>Can Chi năm sinh: ${canChiNam}</p>`;
+  html+=`<p>Can Chi tháng sinh: ${canChiThang}</p>`;
+  html+=`<p>Can Chi giờ sinh: ${canChiGio}</p>`;
+  html+=`<p>Mệnh: ${menh}</p>`;
+  luan.forEach(item=>{ html+=`<div class="luan-giai"><h3>${item.title}</h3><p>${item.text}</p></div>`; });
+  document.getElementById('ketQua').innerHTML=html;
+});
+
+// ================== Xuất PDF gradient ánh kim ==================
+document.getElementById('downloadPDF').addEventListener('click', ()=>{
+  const { jsPDF } = window.jspdf; const doc=new jsPDF();
+  function mauNguhanh(menh){ switch(menh){
+    case "Hải Trung Kim": case "Kiếm Phong Kim": case "Sa Trung Kim": return ["#ffffff","#D4D4D4","#C0C0C0"];
+    case "Lư Trung Hỏa": case "Sơn Đầu Hỏa": return ["#FF6347","#FF4500","#FF8C00"];
+    case "Thổ Địa Bích": return ["#FFD700","#DAA520","#F0E68C"];
+    case "Mộc": return ["#32CD32","#228B22","#00FA9A"];
+    case "Thủy": return ["#1E90FF","#00BFFF","#87CEFA"];
+    default: return ["#000000","#333333","#555555"];
+  }}
+  function drawGradientText(text,x,y,colors){ doc.setTextColor(colors[0]); doc.text(text,x,y); }
+  drawGradientText("KẾT QUẢ TỬ VI CÁ NHÂN",105,15,["#FFD700","#FFA500","#FFFACD"]);
+  const img=new Image(); img.src="logo-am-duong-bat-quai.png";
+  img.onload=function(){ doc.addImage(img,'PNG',80,20,50,50);
+    let y=80; const ketQua=document.getElementById('ketQua'); const basicInfo=ketQua.querySelectorAll('p');
+    basicInfo.forEach(p=>{ const lines=doc.splitTextToSize(p.innerText,180); doc.setTextColor("#000000"); doc.text(lines,15,y); y+=lines.length*7; });
+    y+=5; const items=ketQua.querySelectorAll('.luan-giai'); const menh=ketQua.querySelector('p:nth-child(5)').innerText.split(": ")[1]; const gradient=mauNguhanh(menh);
+    items.forEach(item=>{ const title=item.querySelector('h3').innerText; const text=item.querySelector('p').innerText;
+      drawGradientText(title,15,y,gradient); y+=7; const lines=doc.splitTextToSize(text,180); doc.setTextColor("#000000"); doc.text(lines,15,y); y+=lines.length*7+3;
+    });
+    doc.save("ket-qua-tu-vi.pdf");
+  };
+});
+
+// ================== Chia sẻ ==================
+document.getElementById('shareFacebook').addEventListener('click',()=>alert("Chia sẻ Facebook!"));
+document.getElementById('shareZalo').addEventListener('click',()=>alert("Chia sẻ Zalo!"));
+</script>
+</body>
+</html>
